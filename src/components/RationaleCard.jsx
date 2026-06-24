@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import RetentionCanvasTab from '../../Huy/RetentionCanvasTab';
 
 // Hardcoded design rationales as requested by the user, including Step 0
 const RATIONALES = {
@@ -51,6 +52,7 @@ const RATIONALES = {
  * @param {Function} [props.onStepClick] - Jump to a step directly (for testing/eval)
  */
 export default function RationaleCard({ currentStep, onStepClick }) {
+  const [activeTab, setActiveTab] = useState('rationale');
   const activeRationale = RATIONALES[currentStep] || RATIONALES[0];
   
   // Calculate progress bar width based on active step (0 to 4 -> 5 nodes)
@@ -58,63 +60,115 @@ export default function RationaleCard({ currentStep, onStepClick }) {
 
   return (
     <aside className="rationale-sidebar glass-container animate-slide-in-right">
-      <div className="rationale-header">
-        <div className="chat-title-dot" style={{ backgroundColor: activeRationale.badgeColor }}></div>
-        <h3>Design Rationale</h3>
-        <span className="rationale-badge">
-          {currentStep === 0 ? "Onboarding" : `Step ${currentStep}/4`}
-        </span>
+      {/* Sidebar Header with main Tab navigation */}
+      <div style={{
+        display: 'flex',
+        borderBottom: '1px solid var(--glass-border)',
+        background: 'rgba(0, 0, 0, 0.1)'
+      }}>
+        <button
+          onClick={() => setActiveTab('rationale')}
+          style={{
+            flex: 1,
+            padding: '16px 8px',
+            border: 'none',
+            borderBottom: activeTab === 'rationale' ? '2px solid var(--primary-light)' : '2px solid transparent',
+            background: 'transparent',
+            color: activeTab === 'rationale' ? '#ffffff' : 'var(--text-muted)',
+            fontSize: '0.85rem',
+            fontWeight: '600',
+            cursor: 'pointer',
+            fontFamily: 'var(--font-display)',
+            transition: 'var(--transition-fast)'
+          }}
+        >
+          Day 18 Rationale
+        </button>
+        <button
+          onClick={() => setActiveTab('day20_canvas')}
+          style={{
+            flex: 1,
+            padding: '16px 8px',
+            border: 'none',
+            borderBottom: activeTab === 'day20_canvas' ? '2px solid var(--primary-light)' : '2px solid transparent',
+            background: 'transparent',
+            color: activeTab === 'day20_canvas' ? '#ffffff' : 'var(--text-muted)',
+            fontSize: '0.85rem',
+            fontWeight: '600',
+            cursor: 'pointer',
+            fontFamily: 'var(--font-display)',
+            transition: 'var(--transition-fast)'
+          }}
+        >
+          Day 20 Canvas (Huy)
+        </button>
       </div>
 
-      <div className="rationale-content">
-        {/* Step Navigation & Status Indicators */}
-        <div className="step-indicator-wrapper">
-          <div className="step-indicator-line"></div>
-          <div 
-            className="step-indicator-line-progress" 
-            style={{ width: progressWidth }}
-          ></div>
-          {[0, 1, 2, 3, 4].map((step) => {
-            let stepClass = "";
-            if (step === currentStep) stepClass = "active";
-            else if (step < currentStep) stepClass = "completed";
-
-            return (
-              <button
-                key={step}
-                className={`step-node ${stepClass}`}
-                onClick={() => onStepClick && onStepClick(step)}
-                title={step === 0 ? "Chuyển đến Onboarding" : `Chuyển đến Step ${step}`}
-              >
-                {step}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Design details card */}
-        <div className="rationale-card-body active">
-          <h4 className="rationale-title" style={{ color: activeRationale.badgeColor }}>
-            {activeRationale.title}
-          </h4>
-          
-          <div className="rationale-text">
-            <p style={{ fontWeight: '500', color: '#e2e8f0', fontSize: '0.85rem' }}>
-              🎯 HƯỚNG DẪN: <span style={{ color: 'var(--text-muted)' }}>{activeRationale.guideline}</span>
-            </p>
-            <p style={{ fontWeight: '500', color: '#e2e8f0', fontSize: '0.85rem' }}>
-              ⚠️ MỨC RỦI RO: <span style={{ color: activeRationale.badgeColor }}>{activeRationale.risk}</span>
-            </p>
-            <p style={{ fontWeight: '500', color: '#e2e8f0', fontSize: '0.85rem', marginBottom: '16px' }}>
-              ⚡ HÀNH ĐỘNG AI: <span style={{ color: 'var(--accent)' }}>{activeRationale.action}</span>
-            </p>
-            <hr style={{ border: 'none', borderTop: '1px solid var(--glass-border)', margin: '12px 0' }} />
-            <p style={{ color: '#f3f4f6', fontSize: '0.92rem', lineHeight: '1.7' }}>
-              {activeRationale.text}
-            </p>
+      {activeTab === 'rationale' ? (
+        <>
+          <div className="rationale-header">
+            <div className="chat-title-dot" style={{ backgroundColor: activeRationale.badgeColor }}></div>
+            <h3>Design Rationale</h3>
+            <span className="rationale-badge">
+              {currentStep === 0 ? "Onboarding" : `Step ${currentStep}/4`}
+            </span>
           </div>
+
+          <div className="rationale-content">
+            {/* Step Navigation & Status Indicators */}
+            <div className="step-indicator-wrapper">
+              <div className="step-indicator-line"></div>
+              <div 
+                className="step-indicator-line-progress" 
+                style={{ width: progressWidth }}
+              ></div>
+              {[0, 1, 2, 3, 4].map((step) => {
+                let stepClass = "";
+                if (step === currentStep) stepClass = "active";
+                else if (step < currentStep) stepClass = "completed";
+
+                return (
+                  <button
+                    key={step}
+                    className={`step-node ${stepClass}`}
+                    onClick={() => onStepClick && onStepClick(step)}
+                    title={step === 0 ? "Chuyển đến Onboarding" : `Chuyển đến Step ${step}`}
+                  >
+                    {step}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Design details card */}
+            <div className="rationale-card-body active">
+              <h4 className="rationale-title" style={{ color: activeRationale.badgeColor }}>
+                {activeRationale.title}
+              </h4>
+              
+              <div className="rationale-text">
+                <p style={{ fontWeight: '500', color: '#e2e8f0', fontSize: '0.85rem' }}>
+                  🎯 HƯỚNG DẪN: <span style={{ color: 'var(--text-muted)' }}>{activeRationale.guideline}</span>
+                </p>
+                <p style={{ fontWeight: '500', color: '#e2e8f0', fontSize: '0.85rem' }}>
+                  ⚠️ MỨC RỦI RO: <span style={{ color: activeRationale.badgeColor }}>{activeRationale.risk}</span>
+                </p>
+                <p style={{ fontWeight: '500', color: '#e2e8f0', fontSize: '0.85rem', marginBottom: '16px' }}>
+                  ⚡ HÀNH ĐỘNG AI: <span style={{ color: 'var(--accent)' }}>{activeRationale.action}</span>
+                </p>
+                <hr style={{ border: 'none', borderTop: '1px solid var(--glass-border)', margin: '12px 0' }} />
+                <p style={{ color: '#f3f4f6', fontSize: '0.92rem', lineHeight: '1.7' }}>
+                  {activeRationale.text}
+                </p>
+              </div>
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="rationale-content animate-fade-in" style={{ padding: '20px 24px' }}>
+          <RetentionCanvasTab />
         </div>
-      </div>
+      )}
 
       <div className="rationale-footer">
         <div className="meta-info">
