@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import RetentionCanvasTab from '../../Huy/RetentionCanvasTab';
+import RetentionCanvasTab from '../../RetentionCanvasTab';
 import HookModelTab from './HookModelTab';
+import TrackingLogsTab from '../../TrackingLogsTab';
 
 // Hardcoded design rationales as requested by the user, including Step 0
 const RATIONALES = {
@@ -52,7 +53,12 @@ const RATIONALES = {
  * @param {number} props.currentStep - The current step of the application (0 - 4)
  * @param {Function} [props.onStepClick] - Jump to a step directly (for testing/eval)
  */
-export default function RationaleCard({ currentStep, onStepClick }) {
+export default function RationaleCard({
+  currentStep,
+  onStepClick,
+  trackingLogs = [],
+  onClearTrackingLogs
+}) {
   const [activeTab, setActiveTab] = useState('rationale');
   const activeRationale = RATIONALES[currentStep] || RATIONALES[0];
   
@@ -121,6 +127,24 @@ export default function RationaleCard({ currentStep, onStepClick }) {
         >
           Hook Model (Nhật Anh)
         </button>
+        <button
+          onClick={() => setActiveTab('tracking_logs')}
+          style={{
+            flex: 1,
+            padding: '16px 8px',
+            border: 'none',
+            borderBottom: activeTab === 'tracking_logs' ? '2px solid var(--primary-light)' : '2px solid transparent',
+            background: 'transparent',
+            color: activeTab === 'tracking_logs' ? '#ffffff' : 'var(--text-muted)',
+            fontSize: '0.85rem',
+            fontWeight: '600',
+            cursor: 'pointer',
+            fontFamily: 'var(--font-display)',
+            transition: 'var(--transition-fast)'
+          }}
+        >
+          Tracking Logs
+        </button>
       </div>
 
       {activeTab === 'rationale' ? (
@@ -187,9 +211,16 @@ export default function RationaleCard({ currentStep, onStepClick }) {
         <div className="rationale-content animate-fade-in" style={{ padding: '20px 24px' }}>
           <RetentionCanvasTab />
         </div>
-      ) : (
+      ) : activeTab === 'hook_model' ? (
         <div className="rationale-content animate-fade-in" style={{ padding: '20px 24px' }}>
           <HookModelTab />
+        </div>
+      ) : (
+        <div className="rationale-content animate-fade-in" style={{ padding: '20px 24px' }}>
+          <TrackingLogsTab
+            events={trackingLogs}
+            onClear={onClearTrackingLogs}
+          />
         </div>
       )}
 

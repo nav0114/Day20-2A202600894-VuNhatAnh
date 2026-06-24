@@ -1,0 +1,120 @@
+[
+  {
+    "id": "handoff_offered-1782275772543-k64nm4",
+    "event_name": "handoff_offered",
+    "timestamp": "2026-06-24T04:36:12.543Z",
+    "user_id": "demo_user_001",
+    "session_id": "demo_session_001",
+    "current_step": 4,
+    "properties": {
+      "serial": "TV12345",
+      "entry_method": "qr",
+      "reason": "serial_conflict_detected"
+    }
+  },
+  {
+    "id": "serial_conflict_detected-1782275772543-yvux35",
+    "event_name": "serial_conflict_detected",
+    "timestamp": "2026-06-24T04:36:12.543Z",
+    "user_id": "demo_user_001",
+    "session_id": "demo_session_001",
+    "current_step": 4,
+    "properties": {
+      "serial": "TV12345",
+      "entry_method": "qr",
+      "conflict_type": "warranty_expiry_vs_invoice_date"
+    }
+  },
+  {
+    "id": "serial_lookup_started-1782275771838-8ht5sv",
+    "event_name": "serial_lookup_started",
+    "timestamp": "2026-06-24T04:36:11.838Z",
+    "user_id": "demo_user_001",
+    "session_id": "demo_session_001",
+    "current_step": 4,
+    "properties": {
+      "serial": "TV12345",
+      "entry_method": "qr"
+    }
+  },
+  {
+    "id": "serial_qr_scanned-1782275771838-ao8o89",
+    "event_name": "serial_qr_scanned",
+    "timestamp": "2026-06-24T04:36:11.838Z",
+    "user_id": "demo_user_001",
+    "session_id": "demo_session_001",
+    "current_step": 4,
+    "properties": {
+      "serial": "TV12345",
+      "entry_method": "qr",
+      "source": "qr_scanner_modal"
+    }
+  },
+  {
+    "id": "qr_scanner_opened-1782275755175-wkf33l",
+    "event_name": "qr_scanner_opened",
+    "timestamp": "2026-06-24T04:35:55.175Z",
+    "user_id": "demo_user_001",
+    "session_id": "demo_session_001",
+    "current_step": 4,
+    "properties": {
+      "source": "step4_qr_button"
+    }
+  },
+  {
+    "id": "refund_recovery_clicked-1782275743719-sanzfz",
+    "event_name": "refund_recovery_clicked",
+    "timestamp": "2026-06-24T04:35:43.719Z",
+    "user_id": "demo_user_001",
+    "session_id": "demo_session_001",
+    "current_step": 3,
+    "properties": {
+      "source": "step3_recovery_button"
+    }
+  },
+  {
+    "id": "refund_misunderstanding_shown-1782275741471-lrja77",
+    "event_name": "refund_misunderstanding_shown",
+    "timestamp": "2026-06-24T04:35:41.471Z",
+    "user_id": "demo_user_001",
+    "session_id": "demo_session_001",
+    "current_step": 3,
+    "properties": {
+      "trigger": "continue_warranty"
+    }
+  },
+  {
+    "id": "receipt_shown-1782275737897-oqcxzm",
+    "event_name": "receipt_shown",
+    "timestamp": "2026-06-24T04:35:37.897Z",
+    "user_id": "demo_user_001",
+    "session_id": "demo_session_001",
+    "current_step": 2,
+    "properties": {
+      "issue_type": "Màn hình bị sọc kẻ",
+      "receipt_type": "digital_warranty_card"
+    }
+  },
+  {
+    "id": "issue_type_selected-1782275737183-iajru9",
+    "event_name": "issue_type_selected",
+    "timestamp": "2026-06-24T04:35:37.183Z",
+    "user_id": "demo_user_001",
+    "session_id": "demo_session_001",
+    "current_step": 1,
+    "properties": {
+      "issue_type": "Màn hình bị sọc kẻ"
+    }
+  },
+  {
+    "id": "issue_reported-1782275734807-7h591p",
+    "event_name": "issue_reported",
+    "timestamp": "2026-06-24T04:35:34.807Z",
+    "user_id": "demo_user_001",
+    "session_id": "demo_session_001",
+    "current_step": 0,
+    "properties": {
+      "source": "step0_primary_button"
+    }
+  }
+]

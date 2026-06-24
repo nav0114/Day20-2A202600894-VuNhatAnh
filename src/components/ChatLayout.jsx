@@ -19,7 +19,9 @@ export default function ChatLayout({
   onStepClick,
   onReset,
   onOpenFlowMap,
-  onOpenChecklist
+  onOpenChecklist,
+  trackingLogs,
+  onClearTrackingLogs
 }) {
   return (
     <div className="app-wrapper">
@@ -71,6 +73,8 @@ export default function ChatLayout({
       <RationaleCard 
         currentStep={currentStep} 
         onStepClick={onStepClick} 
+        trackingLogs={trackingLogs}
+        onClearTrackingLogs={onClearTrackingLogs}
       />
     </div>
   );

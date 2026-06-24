@@ -5,6 +5,7 @@ import InteractiveCard from './components/InteractiveCard';
 import ActionButton from './components/ActionButton';
 import FlowMapModal from './components/FlowMapModal';
 import LabChecklistModal from './components/LabChecklistModal';
+import QRScannerModal from '../QRScannerModal';
 
 // Pre-defined conversation logs matching each step of design rationale, starting from Step 0
 const STANDARD_HISTORIES = {
@@ -151,6 +152,9 @@ const STANDARD_HISTORIES = {
   ]
 };
 
+const DEMO_USER_ID = 'demo_user_001';
+const DEMO_SESSION_ID = 'demo_session_001';
+
 export default function App() {
   const [currentStep, setCurrentStep] = useState(0);
   const [messages, setMessages] = useState(STANDARD_HISTORIES[0]);
@@ -160,19 +164,60 @@ export default function App() {
   const [isHandoffConnected, setIsHandoffConnected] = useState(false);
   const [isFlowMapOpen, setIsFlowMapOpen] = useState(false);
   const [isChecklistOpen, setIsChecklistOpen] = useState(false);
+  const [isQrScannerOpen, setIsQrScannerOpen] = useState(false);
+  const [trackingLogs, setTrackingLogs] = useState([]);
 
   const messagesEndRef = useRef(null);
+  const trackedOnceKeysRef = useRef(new Set());
 
   // Scroll to bottom whenever messages list updates or typing status updates
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
+  useEffect(() => {
+    trackEvent(
+      'onboarding_started',
+      {
+        entry_point: 'initial_load'
+      },
+      {
+        currentStep: 0,
+        onceKey: 'onboarding_started'
+      }
+    );
+  }, []);
+
+  const trackEvent = (eventName, properties = {}, options = {}) => {
+    const { currentStep: eventStep = currentStep, onceKey } = options;
+
+    if (onceKey && trackedOnceKeysRef.current.has(onceKey)) {
+      return;
+    }
+
+    if (onceKey) {
+      trackedOnceKeysRef.current.add(onceKey);
+    }
+
+    const event = {
+      id: `${eventName}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      event_name: eventName,
+      timestamp: new Date().toISOString(),
+      user_id: DEMO_USER_ID,
+      session_id: DEMO_SESSION_ID,
+      current_step: eventStep,
+      properties
+    };
+
+    setTrackingLogs((prev) => [event, ...prev]);
+  };
+
   // Handle manual step jumping via Sidebar nodes
   const handleStepJump = (step) => {
     setCurrentStep(step);
     setMessages(STANDARD_HISTORIES[step]);
     setSerialInput('');
+    setIsQrScannerOpen(false);
     setIsHandoffOffered(step === 4 ? isHandoffOffered : false);
     setIsHandoffConnected(step === 4 ? isHandoffConnected : false);
   };
@@ -185,6 +230,7 @@ export default function App() {
     setIsTyping(false);
     setIsHandoffOffered(false);
     setIsHandoffConnected(false);
+    setIsQrScannerOpen(false);
   };
 
   // Simulated AI response helper
@@ -212,6 +258,10 @@ export default function App() {
 
   // Step 0 Option click
   const handleStartReport = () => {
+    trackEvent('issue_reported', {
+      source: 'step0_primary_button'
+    });
+
     simulateAIResponse(
       'Tôi muốn báo lỗi thiết bị',
       1,
@@ -227,18 +277,31 @@ export default function App() {
 
   // Step 1 Options selection
   const handleSelectError = (errorTitle) => {
+    trackEvent('issue_type_selected', {
+      issue_type: errorTitle
+    });
+
     simulateAIResponse(
       errorTitle,
       2,
-      () => [
-        {
-          id: `ai-step2-${Date.now()}`,
-          sender: 'ai',
-          text: `Với lỗi "${errorTitle}" bạn chọn, theo chính sách bảo hành phần hiển thị:`,
-          quote: "Theo Điều 4 - Chính sách bảo hành thiết bị hiển thị: Thiết bị gặp lỗi panel màn hình trong vòng 12 tháng đầu sẽ được thay thế linh kiện miễn phí nếu không có dấu hiệu va đập vật lý.",
-          quoteSource: "Chính sách bảo hành sản phẩm Smart TV"
-        }
-      ]
+      () => {
+        trackEvent('receipt_shown', {
+          issue_type: errorTitle,
+          receipt_type: 'digital_warranty_card'
+        }, {
+          currentStep: 2
+        });
+
+        return [
+          {
+            id: `ai-step2-${Date.now()}`,
+            sender: 'ai',
+            text: `Với lỗi "${errorTitle}" bạn chọn, theo chính sách bảo hành phần hiển thị:`,
+            quote: "Theo Điều 4 - Chính sách bảo hành thiết bị hiển thị: Thiết bị gặp lỗi panel màn hình trong vòng 12 tháng đầu sẽ được thay thế linh kiện miễn phí nếu không có dấu hiệu va đập vật lý.",
+            quoteSource: "Chính sách bảo hành sản phẩm Smart TV"
+          }
+        ];
+      }
     );
   };
 
@@ -255,6 +318,12 @@ export default function App() {
 
       setTimeout(() => {
         setIsTyping(false);
+        trackEvent('warranty_policy_shown', {
+          source: 'read_policy_action',
+          policy_mode: 'link_out'
+        }, {
+          currentStep: 2
+        });
         setMessages(prev => [...prev, {
           id: `ai-info-${Date.now()}`,
           sender: 'ai',
@@ -265,13 +334,21 @@ export default function App() {
       simulateAIResponse(
         'Tiếp tục làm thủ tục bảo hành',
         3,
-        () => [
-          {
-            id: `ai-step3-${Date.now()}`,
-            sender: 'ai',
-            text: 'Tôi đã hiểu yêu cầu của bạn. Tôi sẽ tiến hành làm thủ tục hoàn tiền cho bạn ngay bây giờ.'
-          }
-        ]
+        () => {
+          trackEvent('refund_misunderstanding_shown', {
+            trigger: 'continue_warranty'
+          }, {
+            currentStep: 3
+          });
+
+          return [
+            {
+              id: `ai-step3-${Date.now()}`,
+              sender: 'ai',
+              text: 'Tôi đã hiểu yêu cầu của bạn. Tôi sẽ tiến hành làm thủ tục hoàn tiền cho bạn ngay bây giờ.'
+            }
+          ];
+        }
       );
     }
   };
@@ -279,6 +356,12 @@ export default function App() {
   // Step 3 Actions selection
   const handleStep3Action = (actionType) => {
     if (actionType === 'recovery') {
+      trackEvent('refund_recovery_clicked', {
+        source: 'step3_recovery_button'
+      }, {
+        currentStep: 3
+      });
+
       simulateAIResponse(
         'Không, tôi không muốn hoàn tiền',
         4,
@@ -310,24 +393,45 @@ export default function App() {
     }
   };
 
-  // Step 4 Serial submission
-  const handleSerialSubmit = (e) => {
-    e.preventDefault();
-    if (!serialInput.trim()) return;
+  const handleSerialFlow = (inputValue, options = {}) => {
+    const normalizedSerial = inputValue.trim();
 
-    const inputVal = serialInput.trim();
-    setSerialInput('');
+    if (!normalizedSerial) return;
+
+    const entryMethod = options.entryMethod || 'manual';
+
+    trackEvent('serial_lookup_started', {
+      serial: normalizedSerial,
+      entry_method: entryMethod
+    }, {
+      currentStep: 4
+    });
 
     simulateAIResponse(
-      `Mã số Serial Tivi của tôi là: ${inputVal}`,
+      `Mã số Serial Tivi của tôi là: ${normalizedSerial}`,
       4,
       () => {
+        trackEvent('serial_conflict_detected', {
+          serial: normalizedSerial,
+          entry_method: entryMethod,
+          conflict_type: 'warranty_expiry_vs_invoice_date'
+        }, {
+          currentStep: 4
+        });
+        trackEvent('handoff_offered', {
+          serial: normalizedSerial,
+          entry_method: entryMethod,
+          reason: 'serial_conflict_detected'
+        }, {
+          currentStep: 4
+        });
+
         setIsHandoffOffered(true);
         return [
           {
             id: `ai-serial-ack-${Date.now()}`,
             sender: 'ai',
-            text: `Tôi đã nhận được số Serial "${inputVal}". Tuy nhiên, hệ thống đối soát dữ liệu báo cáo thông tin mâu thuẫn: Số Serial này tương ứng với dòng máy đã hết hạn bảo hành trên hệ thống, nhưng hóa đơn mua hàng bạn cung cấp lại hiển thị ngày mua vẫn nằm trong thời hạn bảo hành.`
+            text: `Tôi đã nhận được số Serial "${normalizedSerial}". Tuy nhiên, hệ thống đối soát dữ liệu báo cáo thông tin mâu thuẫn: Số Serial này tương ứng với dòng máy đã hết hạn bảo hành trên hệ thống, nhưng hóa đơn mua hàng bạn cung cấp lại hiển thị ngày mua vẫn nằm trong thời hạn bảo hành.`
           },
           {
             id: `ai-serial-dontact-${Date.now()}`,
@@ -339,8 +443,54 @@ export default function App() {
     );
   };
 
+  // Step 4 Serial submission
+  const handleSerialSubmit = (e) => {
+    e.preventDefault();
+    if (!serialInput.trim()) return;
+
+    const inputVal = serialInput.trim();
+    setSerialInput('');
+    handleSerialFlow(inputVal, { entryMethod: 'manual' });
+  };
+
+  const handleOpenQrScanner = () => {
+    setIsQrScannerOpen(true);
+    trackEvent('qr_scanner_opened', {
+      source: 'step4_qr_button'
+    }, {
+      currentStep: 4
+    });
+  };
+
+  const handleQrScanSuccess = (scanResult) => {
+    const scannedSerial = scanResult?.serial?.trim();
+
+    if (!scannedSerial) return;
+
+    setIsQrScannerOpen(false);
+    setSerialInput('');
+
+    trackEvent('serial_qr_scanned', {
+      serial: scannedSerial,
+      entry_method: scanResult?.entry_method || 'qr',
+      source: scanResult?.source || 'qr_scanner_modal'
+    }, {
+      currentStep: 4
+    });
+
+    handleSerialFlow(scannedSerial, {
+      entryMethod: scanResult?.entry_method || 'qr'
+    });
+  };
+
   // Step 4 Handoff confirmation
   const handleHandoffConnect = () => {
+    trackEvent('handoff_confirmed', {
+      source: 'step4_handoff_button'
+    }, {
+      currentStep: 4
+    });
+
     simulateAIResponse(
       'Đồng ý kết nối nhân viên hỗ trợ',
       4,
@@ -365,6 +515,8 @@ export default function App() {
         onReset={handleReset}
         onOpenFlowMap={() => setIsFlowMapOpen(true)}
         onOpenChecklist={() => setIsChecklistOpen(true)}
+        trackingLogs={trackingLogs}
+        onClearTrackingLogs={() => setTrackingLogs([])}
       >
         {/* Scrollable Conversation Stream */}
         <div className="chat-messages">
@@ -470,23 +622,33 @@ export default function App() {
           {currentStep === 4 && !isTyping && (
             <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
               {!isHandoffOffered ? (
-                <form onSubmit={handleSerialSubmit} className="text-input-form">
-                  <input
-                    type="text"
-                    className="text-input"
-                    placeholder="Nhập mã số Serial của Tivi (Ví dụ: TV12345)..."
-                    value={serialInput}
-                    onChange={(e) => setSerialInput(e.target.value)}
-                  />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <form onSubmit={handleSerialSubmit} className="text-input-form">
+                    <input
+                      type="text"
+                      className="text-input"
+                      placeholder="Nhập mã số Serial của Tivi (Ví dụ: TV12345)..."
+                      value={serialInput}
+                      onChange={(e) => setSerialInput(e.target.value)}
+                    />
+                    <ActionButton
+                      variant="primary"
+                      type="submit"
+                      disabled={!serialInput.trim()}
+                      style={{ padding: '8px 16px', borderRadius: '10px' }}
+                    >
+                      Gửi Serial
+                    </ActionButton>
+                  </form>
+
                   <ActionButton
-                    variant="primary"
-                    type="submit"
-                    disabled={!serialInput.trim()}
-                    style={{ padding: '8px 16px', borderRadius: '10px' }}
+                    variant="secondary"
+                    onClick={handleOpenQrScanner}
+                    style={{ width: '100%' }}
                   >
-                    Gửi Serial
+                    Quét mã QR trên tem bảo hành / Scan QR Serial
                   </ActionButton>
-                </form>
+                </div>
               ) : (
                 <div className="actions-container" style={{ margin: 0 }}>
                   {!isHandoffConnected ? (
@@ -520,6 +682,12 @@ export default function App() {
       <LabChecklistModal
         isOpen={isChecklistOpen}
         onClose={() => setIsChecklistOpen(false)}
+      />
+
+      <QRScannerModal
+        isOpen={isQrScannerOpen}
+        onClose={() => setIsQrScannerOpen(false)}
+        onScanSuccess={handleQrScanSuccess}
       />
     </>
   );
