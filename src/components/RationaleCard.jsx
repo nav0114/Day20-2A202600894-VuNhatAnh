@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import RetentionCanvasTab from '../../Huy/RetentionCanvasTab';
+import HookModelTab from './HookModelTab';
 
 // Hardcoded design rationales as requested by the user, including Step 0
 const RATIONALES = {
@@ -102,6 +103,24 @@ export default function RationaleCard({ currentStep, onStepClick }) {
         >
           Day 20 Canvas (Huy)
         </button>
+        <button
+          onClick={() => setActiveTab('hook_model')}
+          style={{
+            flex: 1,
+            padding: '16px 8px',
+            border: 'none',
+            borderBottom: activeTab === 'hook_model' ? '2px solid var(--primary-light)' : '2px solid transparent',
+            background: 'transparent',
+            color: activeTab === 'hook_model' ? '#ffffff' : 'var(--text-muted)',
+            fontSize: '0.85rem',
+            fontWeight: '600',
+            cursor: 'pointer',
+            fontFamily: 'var(--font-display)',
+            transition: 'var(--transition-fast)'
+          }}
+        >
+          Hook Model (Nhật Anh)
+        </button>
       </div>
 
       {activeTab === 'rationale' ? (
@@ -164,9 +183,13 @@ export default function RationaleCard({ currentStep, onStepClick }) {
             </div>
           </div>
         </>
-      ) : (
+      ) : activeTab === 'day20_canvas' ? (
         <div className="rationale-content animate-fade-in" style={{ padding: '20px 24px' }}>
           <RetentionCanvasTab />
+        </div>
+      ) : (
+        <div className="rationale-content animate-fade-in" style={{ padding: '20px 24px' }}>
+          <HookModelTab />
         </div>
       )}
 

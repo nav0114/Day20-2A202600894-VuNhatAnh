@@ -1,4 +1,5 @@
 import React from 'react';
+import WarrantyCard from './WarrantyCard';
 
 /**
  * MessageBubble Component
@@ -33,12 +34,7 @@ export default function MessageBubble({
         <div className="bubble-text">{text}</div>
         
         {isAI && quote && (
-          <div className="message-quote">
-            "{quote}"
-            {quoteSource && (
-              <span className="quote-source">— {quoteSource}</span>
-            )}
-          </div>
+          <WarrantyCard quote={quote} quoteSource={quoteSource} />
         )}
       </div>
 
